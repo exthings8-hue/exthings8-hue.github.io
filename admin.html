@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kørekort Admin</title>
+  <style>
+    :root {
+      --bg: #061528;
+      --bg-2: #0d1f3a;
+      --panel: #122b4c;
+      --panel-2: #1c3a5d;
+      --muted: #9aa8bf;
+      --text: #f4f6fb;
+      --pink: #d9a8ef;
+      --pink-strong: #c99ae8;
+      --border: #223d5f;
+      --danger: #ff7a7a;
+      --success: #8be6b0;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0a1d35 0%, #061528 55%, #040e1a 100%);
+      color: var(--text);
+      font-family: Roboto, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      background: rgba(14, 29, 49, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: rgba(18, 43, 76, 0.9);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .logout {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 13px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .panel {
+      display: none;
+      padding: 20px;
+    }
+
+    .panel.active { display: block; }
+
+    .login-box {
+      padding: 32px 20px;
+      display: grid;
+      place-items: center;
+    }
+
+    .login-card {
+      width: min(420px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px 22px;
+    }
+
+    .login-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.6rem;
+    }
+
+    .login-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .login-card input,
+    .license-form input,
+    .license-form select {
+      width: 100%;
+      margin-top: 6px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+
+    .login-card button,
+    .license-form button,
+    .license-list button {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .login-card button,
+    .license-form button {
+      width: 100%;
+      margin-top: 18px;
+      background: var(--pink);
+      color: #1d1132;
+      padding: 12px 14px;
+    }
+
+    .error {
+      min-height: 24px;
+      margin-top: 12px;
+      color: #ffd2d2;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .license-form {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .license-form h3 {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+    }
+
+    .field .key-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .field .key-row input {
+      margin-top: 0;
+      flex: 1;
+    }
+
+    .mini-btn {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      min-width: 92px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .list-wrap {
+      margin-top: 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .list-wrap h3 {
+      margin-top: 0;
+    }
+
+    .license-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .license-list li {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .license-meta {
+      min-width: 220px;
+    }
+
+    .license-meta strong {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(217, 168, 239, 0.14);
+      border: 1px solid rgba(217, 168, 239, 0.4);
+      color: var(--pink);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .license-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .license-list button {
+      padding: 8px 10px;
+      min-width: 88px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .license-list .danger {
+      background: rgba(255, 122, 122, 0.08);
+      border-color: rgba(255, 122, 122, 0.35);
+      color: #ffd0d0;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 10px 0 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Kørekort Admin</h1>
+      <button class="logout" id="logoutBtn" type="button" style="display:none">Log ud</button>
+    </div>
+
+    <section id="loginView" class="panel active login-box">
+      <div class="login-card">
+        <h2>Admin login</h2>
+        <p>Brug admin-koden til at oprette og administrere licenser.</p>
+        <div class="field">
+          <label for="adminCode">Admin kode</label>
+          <input id="adminCode" type="password" placeholder="Indtast kode" autocomplete="off">
+        </div>
+        <button id="adminLoginBtn" type="button">Log ind</button>
+        <div class="error" id="adminError"></div>
+      </div>
+    </section>
+
+    <section id="adminView" class="panel">
+      <div class="grid">
+        <form id="licenseForm" class="license-form">
+          <h3>Ny licens</h3>
+
+          <div class="field">
+            <label for="licenseKey">Licens key</label>
+            <div class="key-row">
+              <input id="licenseKey" type="text" placeholder="fx NIGGA123" autocomplete="off">
+              <button type="button" class="mini-btn" id="randomKeyBtn">Generér</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ownerName">Navn</label>
+            <input id="ownerName" type="text" placeholder="Fulde navn" autocomplete="off">
+          </div>
+
+          <button type="submit">Gem licens</button>
+        </form>
+
+        <div class="list-wrap">
+          <h3>Licenser</h3>
+          <ul id="licensesList" class="license-list"></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const ADMIN_CODE = 'sutminpik!12';
+    const LICENSES_KEY = 'korekort_licenses_v1';
+    const ACTIVE_LICENSE_KEY = 'korekort_active_license';
+
+    const loginView = document.getElementById('loginView');
+    const adminView = document.getElementById('adminView');
+    const adminError = document.getElementById('adminError');
+    const adminCodeInput = document.getElementById('adminCode');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const licenseForm = document.getElementById('licenseForm');
+    const licensesList = document.getElementById('licensesList');
+
+    function readLicenses() {
+      try {
+        return JSON.parse(localStorage.getItem(LICENSES_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLicenses(data) {
+      localStorage.setItem(LICENSES_KEY, JSON.stringify(data));
+    }
+
+    function normaliseKey(value) {
+      return String(value || '').trim().toUpperCase();
+    }
+
+    function renderLicenses() {
+      const licenses = readLicenses();
+      licensesList.innerHTML = '';
+
+      if (!licenses.length) {
+        const empty = document.createElement('li');
+        empty.className = 'empty';
+        empty.textContent = 'Ingen licenser endnu.';
+        licensesList.appendChild(empty);
+        return;
+      }
+
+      licenses.forEach((license) => {
+        const item = document.createElement('li');
+        item.innerHTML = `
+          <div class="license-meta">
+            <span class="badge">Aktiv</span><br>
+            <strong>${license.key}</strong>
+            <div>${license.name || 'Uden navn'}</div>
+          </div>
+          <div class="license-actions">
+            <button type="button" data-copy="${license.key}">Kopiér</button>
+            <button type="button" class="danger" data-delete="${license.key}">Slet</button>
+          </div>
+        `;
+        licensesList.appendChild(item);
+      });
+    }
+
+    function randomKey() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let out = '';
+      for (let i = 0; i < 8; i++) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return out;
+    }
+
+    function setUserLoggedIn(flag) {
+      loginView.classList.toggle('active', !flag);
+      adminView.classList.toggle('active', flag);
+      logoutBtn.style.display = flag ? 'inline-flex' : 'none';
+      if (!flag) adminCodeInput.value = '';
+    }
+
+    function checkAdminAuth() {
+      return localStorage.getItem('korekort_admin_authed') === '1';
+    }
+
+    function loginAdmin() {
+      const code = adminCodeInput.value.trim();
+      if (code === ADMIN_CODE) {
+        localStorage.setItem('korekort_admin_authed', '1');
+        adminError.textContent = '';
+        setUserLoggedIn(true);
+      } else {
+        adminError.textContent = 'Forkert admin kode';
+      }
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem('korekort_admin_authed');
+      setUserLoggedIn(false);
+    }
+
+    function buildLicenseRecord(formData) {
+      const key = normaliseKey(formData.key);
+      if (!key) throw new Error('Licens key mangler');
+
+      const profile = {
+        key,
+        name: String(formData.name || '').trim(),
+        dob: '',
+        cat: '',
+        num: '',
+        photo: ''
+      };
+
+      return profile;
+    }
+
+    function saveLicense(record) {
+      const licenses = readLicenses();
+      const index = licenses.findIndex(item => normaliseKey(item.key) === normaliseKey(record.key));
+      if (index >= 0) {
+        licenses[index] = record;
+      } else {
+        licenses.push(record);
+      }
+      saveLicenses(licenses);
+      localStorage.setItem(ACTIVE_LICENSE_KEY, normaliseKey(record.key));
+      renderLicenses();
+    }
+
+    document.getElementById('adminLoginBtn').addEventListener('click', loginAdmin);
+    adminCodeInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') loginAdmin();
+    });
+    logoutBtn.addEventListener('click', logoutAdmin);
+
+    document.getElementById('randomKeyBtn').addEventListener('click', () => {
+      document.getElementById('licenseKey').value = randomKey();
+    });
+
+    licenseForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const key = document.getElementById('licenseKey').value;
+      const name = document.getElementById('ownerName').value;
+
+      const record = buildLicenseRecord({
+        key,
+        name
+      });
+
+      saveLicense(record);
+      licenseForm.reset();
+      document.getElementById('licenseKey').value = record.key;
+    });
+
+    licensesList.addEventListener('click', (event) => {
+      const target = event.target;
+      const copyKey = target.getAttribute('data-copy');
+      const deleteKey = target.getAttribute('data-delete');
+
+      if (copyKey) {
+        navigator.clipboard?.writeText(copyKey).catch(() => {});
+      }
+
+      if (deleteKey) {
+        const licenses = readLicenses().filter(item => normaliseKey(item.key) !== normaliseKey(deleteKey));
+        saveLicenses(licenses);
+        renderLicenses();
+      }
+    });
+
+    setUserLoggedIn(checkAdminAuth());
+    renderLicenses();
+  </script>
+</body>
+</html>
